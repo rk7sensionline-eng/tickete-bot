@@ -13,8 +13,8 @@ const {
 
 // ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────────
 const TOKEN = process.env.TOKEN; // Token salvo nas variáveis do Railway
-const EMBED_COLOR = "#e91e8c";
-const TICKET_CATEGORY = "🎟️・ticket";
+const EMBED_COLOR = "#FF0000";
+const TICKET_CATEGORY = "1464757524656820254";
 const SUPPORT_ROLE_ID = null;
 // ─────────────────────────────────────────────────────────────────────────────
 
