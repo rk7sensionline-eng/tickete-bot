@@ -50,8 +50,6 @@ client.on("messageCreate", async (message) => {
       "**| Informações**\n" +
       "> Olá, se você está lendo isso aqui, provavelmente está precisando de ajuda\n" +
       "> clique no botão abaixo para tirar suas dúvidas\n\n" +
-      "**| Horário de atendimento**\n" +
-      "> Segunda a Sábado (12:00 até as 00:00 Horas)\n\n" +
       "Copyright © rk7sdev"
     )
     .setColor(EMBED_COLOR);
@@ -146,8 +144,6 @@ client.on("interactionCreate", async (interaction) => {
         `Olá ${member}, obrigado por abrir um ticket!\n\n` +
         "Nossa equipe irá te atender em breve.\n" +
         "Descreva o motivo do seu ticket abaixo.\n\n" +
-        "**| Horário de atendimento**\n" +
-        "> Segunda a Sábado (12:00 até as 00:00 Horas)\n\n" +
         "Copyright © rk7sdev"
       )
       .setColor(EMBED_COLOR)
