@@ -11,12 +11,10 @@ const {
   ChannelType,
 } = require("discord.js");
 
-// ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────────
-const TOKEN = process.env.TOKEN; // Token salvo nas variáveis do Railway
+const TOKEN = process.env.TOKEN;
 const EMBED_COLOR = "#FF0000";
-const TICKET_CATEGORY = "1464757524656820254";
+const TICKET_CATEGORY_ID = "1464757524656820254"; // ID da categoria
 const SUPPORT_ROLE_ID = null;
-// ─────────────────────────────────────────────────────────────────────────────
 
 const client = new Client({
   intents: [
@@ -74,13 +72,21 @@ client.on("messageCreate", async (message) => {
 // ─── Interações ───────────────────────────────────────────────────────────────
 client.on("interactionCreate", async (interaction) => {
 
+  // ── Abrir ticket ──
   if (interaction.isStringSelectMenu() && interaction.customId === "ticket_select") {
     await interaction.deferReply({ ephemeral: true });
 
     const guild = interaction.guild;
     const member = interaction.member;
-    const nomeCanal = `ticket-${member.user.username.toLowerCase().replace(/\s/g, "-")}`;
 
+    // ✅ Sanitiza o nome do canal removendo caracteres inválidos
+    const safeName = member.user.username
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-_]/g, "");
+    const nomeCanal = `ticket-${safeName || member.user.id}`;
+
+    // ✅ Verifica ticket existente pelo nome
     const existing = guild.channels.cache.find(
       (c) => c.name === nomeCanal && c.type === ChannelType.GuildText
     );
@@ -91,13 +97,12 @@ client.on("interactionCreate", async (interaction) => {
       });
     }
 
-    let category = guild.channels.cache.find(
-      (c) => c.name === TICKET_CATEGORY && c.type === ChannelType.GuildCategory
-    );
+    // ✅ Busca a categoria pelo ID (não pelo nome)
+    let category = guild.channels.cache.get(TICKET_CATEGORY_ID);
 
     if (!category) {
       category = await guild.channels.create({
-        name: TICKET_CATEGORY,
+        name: "tickets",
         type: ChannelType.GuildCategory,
       });
     }
@@ -168,12 +173,42 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
+  // ── Fechar ticket ──
   if (interaction.isButton() && interaction.customId === "fechar_ticket") {
     await interaction.deferReply({ ephemeral: true });
-    await interaction.editReply({ content: "🔒 Fechando o ticket em 5 segundos..." });
+
+    // ✅ Botão de confirmação antes de deletar
+    const confirmBtn = new ButtonBuilder()
+      .setCustomId("confirmar_fechar")
+      .setLabel("Confirmar")
+      .setEmoji("✅")
+      .setStyle(ButtonStyle.Danger);
+
+    const cancelBtn = new ButtonBuilder()
+      .setCustomId("cancelar_fechar")
+      .setLabel("Cancelar")
+      .setEmoji("❌")
+      .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder().addComponents(confirmBtn, cancelBtn);
+
+    await interaction.editReply({
+      content: "⚠️ Tem certeza que deseja fechar este ticket?",
+      components: [row],
+    });
+  }
+
+  // ── Confirmar fechar ──
+  if (interaction.isButton() && interaction.customId === "confirmar_fechar") {
+    await interaction.reply({ content: "🔒 Fechando o ticket em 5 segundos...", ephemeral: true });
     setTimeout(async () => {
       await interaction.channel.delete().catch(console.error);
     }, 5000);
+  }
+
+  // ── Cancelar fechar ──
+  if (interaction.isButton() && interaction.customId === "cancelar_fechar") {
+    await interaction.reply({ content: "✅ Ação cancelada.", ephemeral: true });
   }
 });
 
